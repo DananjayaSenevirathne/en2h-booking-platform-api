@@ -6,6 +6,8 @@ import { CreateServiceDto } from './dto/create-service.dto';
 
 import { UpdateServiceDto } from './dto/update-service.dto';
 
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+
 @Injectable()
 export class ServicesService {
   constructor(private readonly prisma: PrismaService) {}
@@ -16,14 +18,32 @@ export class ServicesService {
     });
   }
 
-  async findAll() {
-    return this.prisma.service.findMany({
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
-  }
+  async findAll(paginationQuery: PaginationQueryDto) {
+    const { page = 1, limit = 10 } = paginationQuery;
 
+    const skip = (page - 1) * limit;
+
+    const [services, total] = await Promise.all([
+      this.prisma.service.findMany({
+        skip,
+        take: limit,
+        orderBy: {
+          createdAt: 'desc',
+        },
+      }),
+      this.prisma.service.count(),
+    ]);
+
+    return {
+      data: services,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
   async findOne(id: string) {
     const service = await this.prisma.service.findUnique({
       where: {
