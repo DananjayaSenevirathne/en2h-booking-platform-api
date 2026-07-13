@@ -7,6 +7,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingDto } from './dto/update-booking.dto';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 
 @Injectable()
 export class BookingsService {
@@ -49,15 +50,62 @@ export class BookingsService {
       },
     });
   }
-  async findAll() {
-    return this.prisma.booking.findMany({
-      include: {
-        service: true,
+  async findAll(paginationQuery: PaginationQueryDto) {
+    const { page = 1, limit = 10, search } = paginationQuery;
+
+    const skip = (page - 1) * limit;
+
+    const where = search
+      ? {
+          OR: [
+            {
+              customerName: {
+                contains: search,
+                mode: 'insensitive' as const,
+              },
+            },
+            {
+              customerEmail: {
+                contains: search,
+                mode: 'insensitive' as const,
+              },
+            },
+            {
+              service: {
+                title: {
+                  contains: search,
+                  mode: 'insensitive' as const,
+                },
+              },
+            },
+          ],
+        }
+      : {};
+
+    const [bookings, total] = await Promise.all([
+      this.prisma.booking.findMany({
+        where,
+        include: {
+          service: true,
+        },
+        skip,
+        take: limit,
+        orderBy: {
+          bookingDate: 'asc',
+        },
+      }),
+      this.prisma.booking.count({ where }),
+    ]);
+
+    return {
+      data: bookings,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
       },
-      orderBy: {
-        bookingDate: 'asc',
-      },
-    });
+    };
   }
 
   async findOne(id: string) {
