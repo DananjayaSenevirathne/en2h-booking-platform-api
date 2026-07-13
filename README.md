@@ -148,7 +148,7 @@ Dananjaya Senevirathne
 
 - Customers can create bookings without registering/logging in, per the spec's business rule; all other booking and service management endpoints require JWT authentication.
 - `bookingDate` must be today or a future date; past dates are rejected at the DTO validation layer.
-- Cancelling a booking is a soft action (status → `CANCELLED`); the existing `DELETE` endpoint remains available separately for hard removal.
+- Cancelling a booking is a soft action (status → `CANCELLED`); the existing `DELETE` endpoint   remains available separately for hard removal.
 - A `CANCELLED` booking cannot transition to `COMPLETED`.
 - `price` is stored as a Prisma `Decimal` to avoid floating-point rounding issues.
 
