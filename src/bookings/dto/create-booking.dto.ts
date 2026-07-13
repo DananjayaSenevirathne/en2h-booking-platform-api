@@ -5,6 +5,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { IsFutureDate } from '../../common/validators/is-future-date.validator';
 
 export class CreateBookingDto {
   @IsString()
@@ -19,6 +20,7 @@ export class CreateBookingDto {
   customerPhone!: string;
 
   @IsDateString()
+  @IsFutureDate({ message: 'bookingDate cannot be in the past' })
   bookingDate!: string;
 
   @IsString()

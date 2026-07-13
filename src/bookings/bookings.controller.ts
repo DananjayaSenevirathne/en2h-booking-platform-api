@@ -18,8 +18,6 @@ import { Query } from '@nestjs/common';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 
 @ApiTags('Bookings')
-@ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
 @Controller('bookings')
 export class BookingsController {
   constructor(private readonly bookingsService: BookingsService) {}
@@ -52,14 +50,20 @@ export class BookingsController {
     type: String,
     example: 'Hair',
   })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @Get()
   async findAll(@Query() paginationQuery: PaginationQueryDto) {
     return this.bookingsService.findAll(paginationQuery);
   }
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return this.bookingsService.findOne(id);
   }
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   async update(
     @Param('id') id: string,
@@ -68,6 +72,15 @@ export class BookingsController {
     return this.bookingsService.update(id, updateBookingDto);
   }
 
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id/cancel')
+  async cancel(@Param('id') id: string) {
+    return this.bookingsService.cancel(id);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async remove(@Param('id') id: string) {
     return this.bookingsService.remove(id);

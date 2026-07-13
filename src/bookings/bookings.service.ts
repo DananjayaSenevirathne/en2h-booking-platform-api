@@ -130,7 +130,16 @@ export class BookingsService {
     return booking;
   }
   async update(id: string, updateBookingDto: UpdateBookingDto) {
-    await this.findOne(id);
+    const booking = await this.findOne(id);
+
+    if (
+      booking.status === BookingStatus.CANCELLED &&
+      updateBookingDto.status === BookingStatus.COMPLETED
+    ) {
+      throw new ConflictException(
+        'Cancelled bookings cannot be marked as completed',
+      );
+    }
 
     if (
       updateBookingDto.serviceId &&
@@ -162,6 +171,23 @@ export class BookingsService {
         bookingDate: updateBookingDto.bookingDate
           ? new Date(updateBookingDto.bookingDate)
           : undefined,
+      },
+    });
+  }
+
+  async cancel(id: string) {
+    const booking = await this.findOne(id);
+
+    if (booking.status === BookingStatus.CANCELLED) {
+      return booking;
+    }
+
+    return this.prisma.booking.update({
+      where: {
+        id,
+      },
+      data: {
+        status: BookingStatus.CANCELLED,
       },
     });
   }
