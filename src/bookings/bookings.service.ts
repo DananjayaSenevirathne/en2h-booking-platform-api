@@ -8,7 +8,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingDto } from './dto/update-booking.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
-
+import { Prisma, BookingStatus } from '@prisma/client';
 @Injectable()
 export class BookingsService {
   constructor(private readonly prisma: PrismaService) {}
@@ -47,40 +47,45 @@ export class BookingsService {
         bookingTime: createBookingDto.bookingTime,
         notes: createBookingDto.notes,
         serviceId: createBookingDto.serviceId,
+        status: BookingStatus.PENDING,
       },
     });
   }
   async findAll(paginationQuery: PaginationQueryDto) {
-    const { page = 1, limit = 10, search } = paginationQuery;
+    const { page = 1, limit = 10, search, status } = paginationQuery;
 
     const skip = (page - 1) * limit;
 
-    const where = search
-      ? {
-          OR: [
-            {
-              customerName: {
-                contains: search,
-                mode: 'insensitive' as const,
-              },
+    const where: Prisma.BookingWhereInput = {};
+
+    if (search) {
+      where.OR = [
+        {
+          customerName: {
+            contains: search,
+            mode: 'insensitive',
+          },
+        },
+        {
+          customerEmail: {
+            contains: search,
+            mode: 'insensitive',
+          },
+        },
+        {
+          service: {
+            title: {
+              contains: search,
+              mode: 'insensitive',
             },
-            {
-              customerEmail: {
-                contains: search,
-                mode: 'insensitive' as const,
-              },
-            },
-            {
-              service: {
-                title: {
-                  contains: search,
-                  mode: 'insensitive' as const,
-                },
-              },
-            },
-          ],
-        }
-      : {};
+          },
+        },
+      ];
+    }
+
+    if (status) {
+      where.status = status;
+    }
 
     const [bookings, total] = await Promise.all([
       this.prisma.booking.findMany({

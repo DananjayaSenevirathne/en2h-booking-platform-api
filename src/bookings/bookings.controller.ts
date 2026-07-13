@@ -28,7 +28,12 @@ export class BookingsController {
   async create(@Body() createBookingDto: CreateBookingDto) {
     return this.bookingsService.create(createBookingDto);
   }
-
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: ['PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED'],
+    example: 'PENDING',
+  })
   @ApiQuery({
     name: 'page',
     required: false,

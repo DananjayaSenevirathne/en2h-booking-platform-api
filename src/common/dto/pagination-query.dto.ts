@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
-import { IsInt, IsOptional, Min } from 'class-validator';
-import { IsString } from 'class-validator';
+import { IsEnum, IsInt, IsOptional, IsString, Min } from 'class-validator';
+import { BookingStatus } from '@prisma/client';
 
 export class PaginationQueryDto {
   @IsOptional()
@@ -18,4 +18,8 @@ export class PaginationQueryDto {
   @IsOptional()
   @IsString()
   search?: string;
+
+  @IsOptional()
+  @IsEnum(BookingStatus)
+  status?: BookingStatus;
 }
