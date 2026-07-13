@@ -95,6 +95,17 @@ JWT_SECRET=your_secret_key
 
 ---
 
+## Environment Setup
+
+Copy the example environment file.
+
+```bash
+cp .env.example .env
+```
+
+Update the values inside `.env` according to your local PostgreSQL database.
+
+
 ## Swagger Documentation
 
 After starting the server, open:
